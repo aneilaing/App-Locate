@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Assignment 3</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+        <script type='text/javascript'
+        src="https://www.bing.com/api/maps/mapcontrol?key=Am_yOe09fIRAWzx73nDXCo3nsOwWaUN6zPbGhi_hXLinEqEoF5EZkq500aKpZUr1"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script>
+                var map;
+                var myVar;
+                function initialloadMap(){
+                  map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+                  center: new Microsoft.Maps.Location(43.252443, -79.831020),
+                  zoom: 15
+                  });
+                }
+                function loadMapScenario(latitudePosition, longitudePosition) {
+                    map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+                    center: new Microsoft.Maps.Location(latitudePosition, longitudePosition),
+                    zoom: 15
+                    });
+                    var pushpin = new Microsoft.Maps.Pushpin(map.getCenter(), {icon:'poi_custom.png', anchor: new Microsoft.Maps.Point(12, 39),title: 'Current Location'});
+                    map.entities.push(pushpin);
+
+                }
+
+
+                /*code to get user's location and check if it is available*/
+                function getLocation() {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(showPosition, showError);
+                  } else {
+                    document.getElementById("alertMsg").innerHTML = "Error: Location could not be found";
+
+                  }
+                }
+                  /*code to show user's location if it is available*/
+                function showPosition(position) {
+                  loadMapScenario(position.coords.latitude, position.coords.longitude);
+                  document.getElementById("mapholder").innerHTML = "<img src='"+img_url+"'>";
+                }
+                /*function with timer*/
+                function showTimer(){
+                  document.getElementById("alertMsg").style = "visibility:hidden";
+                }
+
+                /*code to display the error when location not found*/
+                function showError(error) {
+                  if(error.code != null)
+                  document.getElementById("alertMsg").style = "visibility:visible;";
+                  document.getElementById("alertMsg").innerHTML = "Error: Location could not be found";
+                  document.getElementById("alertMsg").setAttribute('class', 'alert alert-danger');
+                  myVar = setTimeout(showTimer, 7000);
+                }
+
+                function myFunction() {
+                  myVar = setTimeout(showError, 3000);
+                }
+
+                function findLocations(locationName, iconName){
+                var myVar =[];
+
+                for (i = 0; i < locationName.length; i++)
+                {
+                  var pushpin = new Microsoft.Maps.Pushpin(
+                     new Microsoft.Maps.Location( locationName[i].LATITUDE,
+                                                  locationName[i].LONGITUDE )
+                      , {icon:iconName, anchor: new Microsoft.Maps.Point(12, 12),title: locationName[i].NAME});
+                  map.entities.push(pushpin);
+                  var lLocations = new Microsoft.Maps.Location(locationName[i].LATITUDE,
+                                               locationName[i].LONGITUDE );
+                  myVar[i]= (lLocations);
+                  console.log(lLocations);
+                }
+                /*var lLocations = new Microsoft.Maps.Location[](myVar);*/
+                var rect = Microsoft.Maps.LocationRect.fromLocations(myVar);
+                map.setView({ bounds: rect, padding: 80 });
+              }
+
+              function clearPushpins(){
+                map.entities.push(Microsoft.Maps.TestDataGenerator.getPushpins(10, map.getBounds()));
+                var updatePrintout = setTimeout(function () {
+                  for (var i = map.entities.getLength() - 1; i >= 0; i--) {
+                      var pushpin = map.entities.get(i);
+                      if (pushpin instanceof Microsoft.Maps.Pushpin) {
+                          map.entities.removeAt(i);
+                      }
+                  }
+              });
+            }
+
+              $(document).ready(function(){
+                $("button").mousedown(
+                  function(){
+                    clearPushpins();
+                  });
+
+                $("#geolocate").click(
+                  function()
+                  {
+                  getLocation();
+                });
+
+                $("#Hospitals").click(
+                  function()
+                  {
+                  findLocations(hospitals, 'hospital.png');
+                });
+
+                $("#FireStations").click(
+                  function()
+                  {
+                  findLocations(fire_stations, 'fire_station.png');
+                });
+
+                $("#Schools").click(
+                  function()
+                  {
+                  findLocations(schools, 'school.png');
+                });
+
+                $("#Waterfalls").click(
+                  function()
+                  {
+                  findLocations(waterfalls, 'waterfall.png');
+                });
+
+                $("#Clear").click(
+                  function()
+                  {
+                  clearPushpins();
+                });
+
+              });
+
+        </script>
+        <script src="hospitals.js"></script>
+        <script src="fire_stations.js"></script>
+        <script src="schools.js"></script>
+        <script src="waterfalls.js"></script>
+    </head>
+    <body onload='initialloadMap()' style =" margin: 5px 25px; overflow:auto;">
+        <div id='printoutPanel'></div>
+
+        <div style = "padding: 10px;">
+          <button type="button" id= "geolocate" class="btn btn-primary">Geolocate</button>
+          <button type="button" id= "Hospitals" class="btn btn-secondary">Hospitals</button>
+          <button type="button" id= "FireStations" class="btn btn-success">Fire Stations</button>
+          <button type="button" id= "Schools" class="btn btn-danger">Schools</button>
+          <button type="button" id= "Waterfalls" class="btn btn-warning">Waterfalls</button>
+          <button type="button" id= "Clear" class="btn btn-info">Clear</button>
+        </div>
+
+        <div id='myMap' style='min-width: 600px; min-height: 600px;'></div>
+        <div id="alertMsg" role="alert" style = "visibility:hidden;"></div>
+
+    </body>
+</html>
